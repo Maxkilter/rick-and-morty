@@ -1,9 +1,19 @@
 import React from 'react';
-import { render } from '@testing-library/react';
+import { render, cleanup } from '@testing-library/react';
 import App from './App';
 
-test('renders learn react link', () => {
-  const { getByText } = render(<App />);
-  const linkElement = getByText(/learn react/i);
-  expect(linkElement).toBeInTheDocument();
+describe('App', () => {
+    afterEach(cleanup);
+
+    test('should render header', () => {
+        const { getByText } = render(<App />);
+        const header = getByText('Find your characters from Rick and Morty anime');
+        expect(header).toBeInTheDocument();
+    });
+
+    test('should render search characters field with label', () => {
+        const { getByLabelText } = render(<App />);
+        const searchField = getByLabelText('Find a character');
+        expect(searchField).toBeInTheDocument();
+    });
 });

@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.scss';
-import { useHttps } from './http.hook';
+import { useHttps } from './https.hook';
 import Character from './Character';
 import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
