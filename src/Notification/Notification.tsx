@@ -6,7 +6,7 @@ const VERTICAL = 'top';
 const HORIZONTAL = 'center';
 const DURATION = 4000;
 
-const NotificationEmitter = memo((props: {isOpen: boolean}) => {
+const Notification = memo((props: {isOpen: boolean; message: string}) => {
     const [open, setOpen] = useState<boolean>(props.isOpen);
 
     useEffect(() => setOpen(props.isOpen), [props.isOpen]);
@@ -20,9 +20,9 @@ const NotificationEmitter = memo((props: {isOpen: boolean}) => {
             autoHideDuration={DURATION}
         >
             <Alert severity="warning" color="warning">
-                No such characters found
+                {props.message}
             </Alert>
         </Snackbar>
     );
 });
-export default NotificationEmitter;
+export default Notification;
