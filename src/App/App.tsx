@@ -1,11 +1,11 @@
 import React, { useCallback, useState } from 'react';
-import './App.scss';
-import Character from './Character';
+import Character from '../Character';
 import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
 import { debounce, DebouncedFunc } from 'lodash';
-import NotificationEmitter from './notification-emitter';
-import { useHttps } from './service';
+import Notification from '../Notification';
+import { useHttps } from '../service';
+import './App.scss';
 
 const App = () => {
     const [characters, setCharacters] = useState<null | []>(null);
@@ -94,7 +94,7 @@ const App = () => {
                   </div>
           )
         }
-        <NotificationEmitter isOpen={isMessageOpen} message={message}/>
+        <Notification isOpen={isMessageOpen} message={message}/>
     </div>
     );
 };
