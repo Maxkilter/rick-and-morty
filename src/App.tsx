@@ -1,38 +1,56 @@
-import React, { useState } from 'react';
+import React, { useCallback, useState } from 'react';
 import './App.scss';
-import { useHttps } from './https.hook';
 import Character from './Character';
 import TextField from '@material-ui/core/TextField';
 import LinearProgress from '@material-ui/core/LinearProgress';
-
+import { debounce, DebouncedFunc } from 'lodash';
 import NotificationEmitter from './notification-emitter';
+import { useHttps } from './service';
 
 const App = () => {
-    const { isLoading, request, error, clearError } = useHttps();
     const [characters, setCharacters] = useState<null | []>(null);
+    const [prevSearchFn, setPrevSearchFn] = useState<DebouncedFunc<(query: string)
+        => Promise<void>> | null>(null);
+    const [prevQuery, setPrevQuery] = useState('');
     const [isMessageOpen, setIsMessageOpen] = useState(false);
+    const [message, setMessage] = useState('');
+    const { isLoading, request, cancelPrevQuery, error, clearError } = useHttps();
 
     if (error) {
+        setMessage(error?.data.error);
         setIsMessageOpen(true);
-        setCharacters(null);
         clearError();
     }
 
-    const searchCharacters = async (e: React.ChangeEvent<HTMLInputElement>) => {
-        setIsMessageOpen(false);
-        const query = e.target.value;
+    const sendQuery = useCallback(
+        async (query: string) => {
+            setIsMessageOpen(false);
+            setPrevQuery(query);
 
-        if (query === '') {
-            setCharacters([]);
-            return;
-        }
+            if (cancelPrevQuery) { return; }
 
-        const data = await request(`https://rickandmortyapi.com/api/character/?name=${query}`, 'GET');
+            if (query !== prevQuery) {
+                const data = await request(query);
+                setCharacters(data);
+            }
 
-        if (data?.results) {
-            return setCharacters(data.results);
-        }
-    };
+        }, [cancelPrevQuery, request, prevQuery]
+    );
+
+    const searchCharacters = useCallback(
+        ({ target: { value } }) => {
+            const searchFn = debounce(sendQuery, 500);
+
+            setPrevSearchFn(() => {
+                if (prevSearchFn?.cancel) {
+                    prevSearchFn.cancel();
+                }
+                return searchFn;
+            });
+
+            value ? searchFn(value) : setCharacters(null);
+
+        }, [sendQuery, prevSearchFn]);
 
     return (
     <div className="App">
@@ -76,7 +94,7 @@ const App = () => {
                   </div>
           )
         }
-        <NotificationEmitter isOpen={isMessageOpen} />
+        <NotificationEmitter isOpen={isMessageOpen} message={message}/>
     </div>
     );
 };
